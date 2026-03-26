@@ -1,9 +1,18 @@
-// The Swift Programming Language
-// https://docs.swift.org/swift-book
+import Foundation
+import ArgumentParser
+import Yams
+import OrderedCollections
 
 @main
-struct plistyamlplist {
-    static func main() {
-        print("Hello, world!")
+struct PlistYAMLPlist: ParsableCommand {
+    static let configuration = CommandConfiguration(
+        commandName: "plistyamlplist",
+        abstract: "Convert between plist, YAML, and JSON formats",
+        version: "1.0.0"
+    )
+    
+    func run() throws {
+        print("plist-yaml-plist version \(Self.configuration.version)")
+        print("Swift implementation - Phase 1 complete!")
     }
 }

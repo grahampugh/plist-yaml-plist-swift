@@ -1,6 +1,6 @@
 # plist-yaml-plist (Swift)
 
-A Swift implementation of the plist-yaml-plist conversion tool. Converts between Apple plist, YAML, and JSON formats with special optimizations for AutoPkg recipes.
+A completely vibe-coded Swift implementation of the plist-yaml-plist conversion tool. Converts between Apple plist, YAML, and JSON formats with special optimizations for AutoPkg recipes.
 
 ## Features
 
@@ -46,6 +46,7 @@ plistyamlplist file.json [output.plist]
 ```
 
 If the output file is omitted:
+
 - `.plist` files → adds `.yaml` extension
 - `.yaml` files → removes `.yaml` extension
 - `.json` files → removes `.json` extension
@@ -94,6 +95,7 @@ When converting AutoPkg recipes (files ending in `.recipe`, `.recipe.plist`, or 
 ## Comparison with Python Version
 
 This Swift implementation provides:
+
 - Full CLI compatibility with the Python version
 - All AutoPkg recipe optimizations
 - Native binary plist support (no `plutil` command needed)
@@ -105,6 +107,7 @@ This Swift implementation provides:
 ## Implementation Status
 
 ### Complete
+
 - Single file conversion (plist ↔ YAML, JSON → plist)
 - Batch conversion with glob patterns
 - Directory recursion with structure replication  
@@ -114,6 +117,7 @@ This Swift implementation provides:
 - Binary and XML plist support
 
 ### In Testing
+
 - Complex AutoPkg recipe formatting edge cases
 - Large-scale batch operations
 
@@ -176,7 +180,10 @@ Processed 47 file(s)
 ## Credits
 
 Swift port by Graham Pugh, based on the original Python implementation:
+
 - [grahampugh/plist-yaml-plist](https://github.com/grahampugh/plist-yaml-plist)
+
+This project is completely vibe-coded using GitHub CoPilot CLI and the Claude Sonnet 4.5 model.
 
 ## License
 
@@ -203,6 +210,7 @@ make help
 ### Package Details
 
 The Makefile creates a universal macOS installer package:
+
 - **Binary**: Universal (arm64 + x86_64)
 - **Install Location**: `/usr/local/bin/plistyamlplist`
 - **Package Size**: ~1.8MB
@@ -212,12 +220,14 @@ The Makefile creates a universal macOS installer package:
 ### GitHub Release
 
 The `make release` target automatically:
+
 1. Builds the package
 2. Creates a GitHub pre-release
 3. Uploads the .pkg file
 4. Generates release notes
 
 **Requirements:**
+
 - GitHub CLI (`brew install gh`)
 - Authenticated GitHub session (`gh auth login`)
 

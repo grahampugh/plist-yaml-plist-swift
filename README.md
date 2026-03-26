@@ -184,3 +184,44 @@ Swift port by Graham Pugh, based on the original Python implementation:
 ## License
 
 Apache License 2.0 - See LICENSE file for details
+
+## Building and Packaging
+
+### Quick Start
+
+```bash
+# Build and create installer package
+make package
+
+# Clean build artifacts
+make clean
+
+# Create GitHub pre-release (requires gh CLI)
+make release
+
+# Show all available targets
+make help
+```
+
+### Package Details
+
+The Makefile creates a universal macOS installer package:
+- **Binary**: Universal (arm64 + x86_64)
+- **Install Location**: `/usr/local/bin/plistyamlplist`
+- **Package Size**: ~1.8MB
+- **Identifier**: `com.github.grahampugh.plistyamlplist`
+- **Output**: `.build/pkg/plistyamlplist-{version}.pkg`
+
+### GitHub Release
+
+The `make release` target automatically:
+1. Builds the package
+2. Creates a GitHub pre-release
+3. Uploads the .pkg file
+4. Generates release notes
+
+**Requirements:**
+- GitHub CLI (`brew install gh`)
+- Authenticated GitHub session (`gh auth login`)
+
+After running `make release`, visit GitHub to publish the pre-release as a full release.

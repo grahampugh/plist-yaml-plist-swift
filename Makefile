@@ -75,19 +75,19 @@ package: clean
 	@echo "Opening package directory in Finder..."
 	open $(PKG_DIR)
 	@echo ""
-	@echo "✅ Package build complete!"
+	@echo "Package build complete!"
 
 # Create GitHub pre-release
 release: package
 	@echo "Creating GitHub pre-release..."
 	@if ! command -v gh &> /dev/null; then \
-		echo "❌ Error: GitHub CLI (gh) is not installed"; \
+		echo "Error: GitHub CLI (gh) is not installed"; \
 		echo "Install with: brew install gh"; \
 		exit 1; \
 	fi
 	
 	@if ! gh auth status &> /dev/null; then \
-		echo "❌ Error: Not authenticated with GitHub"; \
+		echo "Error: Not authenticated with GitHub"; \
 		echo "Run: gh auth login"; \
 		exit 1; \
 	fi
@@ -95,12 +95,34 @@ release: package
 	@echo "Creating release v$(VERSION)..."
 	gh release create "v$(VERSION)" \
 		--title "plistyamlplist v$(VERSION)" \
-		--notes "Swift implementation of plist-yaml-plist converter.$${'\n\n'}### Installation$${'\n\n'}Download and run the .pkg installer.$${'\n\n'}### Features$${'\n'}- Plist ↔ YAML conversion$${'\n'}- JSON → Plist conversion$${'\n'}- AutoPkg recipe optimization$${'\n'}- Batch processing with glob patterns$${'\n'}- Native macOS 15+ support$${'\n\n'}See CHANGELOG.md for details." \
+		--notes "Swift implementation of plist-yaml-plist converter.\
+\
+\
+### Installation\
+\
+\
+Download and run the .pkg installer.\
+\
+\
+### Features\
+\
+- Plist ↔ YAML conversion\
+\
+- JSON → Plist conversion\
+\
+- AutoPkg recipe optimization\
+\
+- Batch processing with glob patterns\
+\
+- Native macOS 15+ support\
+\
+\
+See CHANGELOG.md for details." \
 		--prerelease \
 		$(PKG_PATH)
 	
 	@echo ""
-	@echo "✅ Pre-release created successfully!"
+	@echo "Pre-release created successfully!"
 	@echo "View at: $$(gh repo view --json url -q .url)/releases"
 	@echo ""
 	@echo "To publish the release, visit GitHub and change from pre-release to full release."

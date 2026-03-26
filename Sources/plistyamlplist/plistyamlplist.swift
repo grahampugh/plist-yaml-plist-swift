@@ -84,8 +84,9 @@ struct PlistYAMLPlist: ParsableCommand {
             outputPath = determinedPath
         }
         
-        // Check if it's a recipe
-        let isRecipe = FileDetector.isRecipeFilename(inputPath)
+        // Check if it's a recipe (by filename or content)
+        let isRecipe = FileDetector.isRecipeFilename(inputPath) || 
+                       (try? FileDetector.isRecipeContent(at: inputPath)) == true
         
         // Perform conversion based on file type
         switch fileType {

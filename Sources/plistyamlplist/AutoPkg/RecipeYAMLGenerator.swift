@@ -10,12 +10,20 @@ struct RecipeYAMLGenerator {
         
         // 1. Description (first if present)
         if let description = recipe.description {
-            lines.append("Description: \(quoteIfNeeded(description))")
+            if description.contains("\n") {
+                appendBlockScalar(description, withKey: "Description", toLines: &lines, indent: 0)
+            } else {
+                lines.append("Description: \(quoteIfNeeded(description))")
+            }
         }
         
         // 2. Comment/Comments (second if present)
         if let comment = recipe.comment {
-            lines.append("Comment: \(quoteIfNeeded(comment))")
+            if comment.contains("\n") {
+                appendBlockScalar(comment, withKey: "Comment", toLines: &lines, indent: 0)
+            } else {
+                lines.append("Comment: \(quoteIfNeeded(comment))")
+            }
         }
         
         // 3. Identifier
@@ -100,7 +108,12 @@ struct RecipeYAMLGenerator {
         
         // Add Comment if present
         if let comment = processor.comment {
-            lines.append("\(indentStr)  Comment: \(quoteIfNeeded(comment))")
+            // Use block scalar for multiline comments
+            if comment.contains("\n") {
+                appendBlockScalar(comment, withKey: "Comment", toLines: &lines, indent: indent + 2)
+            } else {
+                lines.append("\(indentStr)  Comment: \(quoteIfNeeded(comment))")
+            }
         }
         
         // Add Arguments if present
@@ -123,7 +136,12 @@ struct RecipeYAMLGenerator {
         
         switch value {
         case .string(let str):
-            lines.append("\(indentStr)\(key): \(quoteIfNeeded(str))")
+            // Use block scalar (heredoc) for multiline strings
+            if str.contains("\n") {
+                appendBlockScalar(str, withKey: key, toLines: &lines, indent: indent)
+            } else {
+                lines.append("\(indentStr)\(key): \(quoteIfNeeded(str))")
+            }
             
         case .integer(let int):
             lines.append("\(indentStr)\(key): \(int)")
@@ -161,7 +179,18 @@ struct RecipeYAMLGenerator {
         
         switch value {
         case .string(let str):
-            lines.append("\(indentStr)- \(quoteIfNeeded(str))")
+            // Use block scalar (heredoc) for multiline strings in arrays
+            if str.contains("\n") {
+                let blockIndicator = str.hasSuffix("\n") ? "|" : "|-"
+                lines.append("\(indentStr)- \(blockIndicator)")
+                let trimmedValue = str.hasSuffix("\n") ? String(str.dropLast()) : str
+                let stringLines = trimmedValue.split(separator: "\n", omittingEmptySubsequences: false)
+                for line in stringLines {
+                    lines.append("\(indentStr)  \(line)")
+                }
+            } else {
+                lines.append("\(indentStr)- \(quoteIfNeeded(str))")
+            }
             
         case .integer(let int):
             lines.append("\(indentStr)- \(int)")
@@ -194,14 +223,13 @@ struct RecipeYAMLGenerator {
     }
     
     /// Quote a string if it needs quoting for YAML
+    /// Note: This is only called for single-line strings; multiline strings use block scalars
     private static func quoteIfNeeded(_ string: String) -> String {
         // Check if the string needs quoting
         let needsQuoting = string.isEmpty ||
             string.contains(":") ||
             string.contains("#") ||
             string.contains("%") ||  // AutoPkg variables
-            string.contains("\n") ||  // Newlines must be escaped
-            string.contains("\r") ||  // Carriage returns must be escaped
             string.contains("\t") ||  // Tabs will be converted to spaces
             string.starts(with: " ") ||
             string.hasSuffix(" ") ||
@@ -225,12 +253,11 @@ struct RecipeYAMLGenerator {
         if needsQuoting {
             // Escape special characters for YAML string literals
             // Note: tabs are converted to spaces per user preference
+            // Note: newlines/carriage returns should never reach here (they use block scalars)
             let escaped = string
                 .replacingOccurrences(of: "\t", with: "    ")  // Convert tabs to 4 spaces first
                 .replacingOccurrences(of: "\\", with: "\\\\")
                 .replacingOccurrences(of: "\"", with: "\\\"")
-                .replacingOccurrences(of: "\n", with: "\\n")
-                .replacingOccurrences(of: "\r", with: "\\r")
             return "\"\(escaped)\""
         }
         
@@ -248,6 +275,25 @@ struct RecipeYAMLGenerator {
             print(yaml)
             print("---")
             throw ConversionError.invalidYAMLFormat("Generated YAML failed verification: \(error.localizedDescription)")
+        }
+    }
+    
+    /// Append a block scalar (heredoc) for a multiline string
+    /// Uses `|-` to strip trailing newline if the string doesn't end with one
+    private static func appendBlockScalar(_ value: String, withKey key: String, toLines lines: inout [String], indent: Int) {
+        let indentStr = String(repeating: " ", count: indent)
+        
+        // Use `|-` (strip final newlines) if string doesn't end with newline
+        // Use `|` (keep final newline) if string ends with newline
+        let blockIndicator = value.hasSuffix("\n") ? "|" : "|-"
+        lines.append("\(indentStr)\(key): \(blockIndicator)")
+        
+        // Remove trailing newline if present (we'll let the block indicator handle it)
+        let trimmedValue = value.hasSuffix("\n") ? String(value.dropLast()) : value
+        let stringLines = trimmedValue.split(separator: "\n", omittingEmptySubsequences: false)
+        
+        for line in stringLines {
+            lines.append("\(indentStr)  \(line)")
         }
     }
 }

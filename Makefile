@@ -93,31 +93,10 @@ release: package
 	fi
 	
 	@echo "Creating release v$(VERSION)..."
+	@NOTES=$$(printf "Swift implementation of plist-yaml-plist converter.\n\n### Installation\n\nDownload and run the .pkg installer.\n\n### Features\n- Plist ↔ YAML conversion\n- JSON → Plist conversion\n- AutoPkg recipe optimization\n- Batch processing with glob patterns\n- Native macOS 15+ support\n\nSee CHANGELOG.md for details."); \
 	gh release create "v$(VERSION)" \
 		--title "plistyamlplist v$(VERSION)" \
-		--notes "Swift implementation of plist-yaml-plist converter.\
-\
-\
-### Installation\
-\
-\
-Download and run the .pkg installer.\
-\
-\
-### Features\
-\
-- Plist ↔ YAML conversion\
-\
-- JSON → Plist conversion\
-\
-- AutoPkg recipe optimization\
-\
-- Batch processing with glob patterns\
-\
-- Native macOS 15+ support\
-\
-\
-See CHANGELOG.md for details." \
+		--notes "$$NOTES" \
 		--prerelease \
 		$(PKG_PATH)
 	

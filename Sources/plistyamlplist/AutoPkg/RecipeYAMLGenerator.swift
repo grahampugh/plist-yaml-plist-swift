@@ -200,6 +200,9 @@ struct RecipeYAMLGenerator {
             string.contains(":") ||
             string.contains("#") ||
             string.contains("%") ||  // AutoPkg variables
+            string.contains("\n") ||  // Newlines must be escaped
+            string.contains("\r") ||  // Carriage returns must be escaped
+            string.contains("\t") ||  // Tabs will be converted to spaces
             string.starts(with: " ") ||
             string.hasSuffix(" ") ||
             string.starts(with: "-") ||
@@ -220,10 +223,14 @@ struct RecipeYAMLGenerator {
             Double(string) != nil
         
         if needsQuoting {
-            // Escape quotes and backslashes
+            // Escape special characters for YAML string literals
+            // Note: tabs are converted to spaces per user preference
             let escaped = string
+                .replacingOccurrences(of: "\t", with: "    ")  // Convert tabs to 4 spaces first
                 .replacingOccurrences(of: "\\", with: "\\\\")
                 .replacingOccurrences(of: "\"", with: "\\\"")
+                .replacingOccurrences(of: "\n", with: "\\n")
+                .replacingOccurrences(of: "\r", with: "\\r")
             return "\"\(escaped)\""
         }
         

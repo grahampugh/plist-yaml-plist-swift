@@ -3,8 +3,8 @@ import OrderedCollections
 
 /// Represents an AutoPkg recipe with ordered keys for proper formatting
 struct AutoPkgRecipe {
-    var comment: String?
     var description: String?
+    var comment: String?  // Can be "Comment" or "Comments"
     var identifier: String?
     var parentRecipe: String?
     var minimumVersion: String?
@@ -34,12 +34,14 @@ struct AutoPkgRecipe {
     init?(from value: PropertyListValue) {
         guard case .dictionary(let dict) = value else { return nil }
         
-        // Extract standard fields
-        if case .string(let val) = dict["Comment"] {
-            self.comment = val
-        }
+        // Extract standard fields (handle both Comment and Comments)
         if case .string(let val) = dict["Description"] {
             self.description = val
+        }
+        if case .string(let val) = dict["Comment"] {
+            self.comment = val
+        } else if case .string(let val) = dict["Comments"] {
+            self.comment = val
         }
         if case .string(let val) = dict["Identifier"] {
             self.identifier = val
@@ -67,7 +69,7 @@ struct AutoPkgRecipe {
         }
         
         // Store other fields
-        let knownKeys = Set(["Comment", "Description", "Identifier", "ParentRecipe", 
+        let knownKeys = Set(["Description", "Comment", "Comments", "Identifier", "ParentRecipe", 
                              "MinimumVersion", "Input", "Process", "ParentRecipeTrustInfo"])
         for (key, value) in dict where !knownKeys.contains(key) {
             self.otherFields[key] = value
@@ -79,28 +81,40 @@ struct AutoPkgRecipe {
         var ordered: OrderedDictionary<String, PropertyListValue> = [:]
         
         // Add fields in the desired order (only if present)
-        if let comment = comment {
-            ordered["Comment"] = .string(comment)
-        }
+        // 1. Description (first if present)
         if let description = description {
             ordered["Description"] = .string(description)
         }
+        // 2. Comment/Comments (second if present at top level)
+        if let comment = comment {
+            // Use "Comment" as the key (normalize)
+            ordered["Comment"] = .string(comment)
+        }
+        // 3. Identifier (third)
         if let identifier = identifier {
             ordered["Identifier"] = .string(identifier)
         }
+        // 4. ParentRecipe (fourth if present)
         if let parentRecipe = parentRecipe {
             ordered["ParentRecipe"] = .string(parentRecipe)
         }
+        // 5. MinimumVersion (fifth)
         if let minimumVersion = minimumVersion {
             ordered["MinimumVersion"] = .string(minimumVersion)
         }
+        // [blank line will be added by formatter]
+        // 6. Input
         if let input = input {
             let inputDict = Dictionary(uniqueKeysWithValues: input.map { ($0, $1) })
             ordered["Input"] = .dictionary(inputDict)
         }
+        // [blank line will be added by formatter]
+        // 7. Process
         if let process = process {
             ordered["Process"] = .array(process.map { $0.toPropertyListValue() })
         }
+        // [blank line will be added by formatter before ParentRecipeTrustInfo]
+        // 8. ParentRecipeTrustInfo
         if let trustInfo = parentRecipeTrustInfo {
             let trustDict = Dictionary(uniqueKeysWithValues: trustInfo.map { ($0, $1) })
             ordered["ParentRecipeTrustInfo"] = .dictionary(trustDict)
@@ -119,7 +133,7 @@ struct AutoPkgRecipe {
 /// Represents a processor step in an AutoPkg recipe
 struct ProcessorStep {
     var processor: String
-    var comment: String?
+    var comment: String?  // Can be "Comment" or "Comments"
     var arguments: OrderedDictionary<String, PropertyListValue>?
     var otherFields: OrderedDictionary<String, PropertyListValue> = [:]
     
@@ -130,8 +144,10 @@ struct ProcessorStep {
         guard case .string(let proc) = dict["Processor"] else { return nil }
         self.processor = proc
         
-        // Extract optional fields
+        // Extract optional fields (handle both Comment and Comments)
         if case .string(let val) = dict["Comment"] {
+            self.comment = val
+        } else if case .string(let val) = dict["Comments"] {
             self.comment = val
         }
         if case .dictionary(let argsDict) = dict["Arguments"] {
@@ -139,34 +155,35 @@ struct ProcessorStep {
         }
         
         // Store other fields
-        let knownKeys = Set(["Processor", "Comment", "Arguments"])
+        let knownKeys = Set(["Processor", "Comment", "Comments", "Arguments"])
         for (key, value) in dict where !knownKeys.contains(key) {
             self.otherFields[key] = value
         }
     }
     
     /// Convert to PropertyListValue with proper key ordering
-    /// Processor comes first, Comment second, Arguments last
+    /// Processor comes first, Comment/Comments second, Arguments third
     func toPropertyListValue() -> PropertyListValue {
         var ordered: OrderedDictionary<String, PropertyListValue> = [:]
         
-        // Always add Processor first
+        // 1. Always add Processor first
         ordered["Processor"] = .string(processor)
         
-        // Add other fields (not Comment or Arguments)
-        for (key, value) in otherFields {
-            ordered[key] = value
-        }
-        
-        // Add Comment second-to-last
+        // 2. Add Comment/Comments second (if present)
         if let comment = comment {
+            // Use "Comment" as the key (normalize)
             ordered["Comment"] = .string(comment)
         }
         
-        // Add Arguments last
+        // 3. Add Arguments third (if present)
         if let arguments = arguments {
             let argsDict = Dictionary(uniqueKeysWithValues: arguments.map { ($0, $1) })
             ordered["Arguments"] = .dictionary(argsDict)
+        }
+        
+        // 4. Add other fields after Arguments
+        for (key, value) in otherFields {
+            ordered[key] = value
         }
         
         let dict = Dictionary(uniqueKeysWithValues: ordered.map { ($0, $1) })

@@ -23,7 +23,13 @@ A Swift implementation of the plist-yaml-plist conversion tool. Converts between
 git clone https://github.com/grahampugh/plist-yaml-plist-swift.git
 cd plist-yaml-plist-swift
 swift build -c release
-cp .build/release/plistyamlplist /usr/local/bin/
+sudo cp .build/release/plistyamlplist /usr/local/bin/
+```
+
+### Installing via Homebrew (Coming Soon)
+
+```bash
+brew install plistyamlplist
 ```
 
 ## Usage
@@ -59,12 +65,17 @@ plistyamlplist /path/to/YAML/ --tidy
 ### Batch Conversion
 
 ```bash
-# Convert all YAML files in a directory
+# Convert all YAML files matching a pattern (note the quotes)
 plistyamlplist '/path/to/*.yaml'
 
 # Convert entire folder structure
 plistyamlplist /path/to/YAML/ /path/to/output/
+
+# Tidy all recipes in a folder recursively
+plistyamlplist /path/to/YAML/ --tidy
 ```
+
+Note: When using glob patterns from the command line, wrap the pattern in quotes to prevent shell expansion.
 
 ### YAML/JSON Folder Convention
 
@@ -89,8 +100,81 @@ This Swift implementation provides:
 - ✅ All AutoPkg recipe optimizations
 - ✅ Native binary plist support (no `plutil` command needed)
 - ✅ Faster performance for batch operations
-- ✅ Same folder convention handling
+- ✅ Same folder convention handling (YAML/_YAML, JSON/_JSON)
+- ✅ Glob pattern support for batch conversion
 - ⚠️ Requires macOS 15+ (Python version supports older macOS)
+
+## Implementation Status
+
+### Complete ✅
+- Single file conversion (plist ↔ YAML, JSON → plist)
+- Batch conversion with glob patterns
+- Directory recursion with structure replication  
+- AutoPkg recipe detection and optimization
+- YAML/_YAML and JSON/_JSON folder conventions
+- --tidy flag for recipe reformatting
+- Binary and XML plist support
+
+### In Testing
+- Complex AutoPkg recipe formatting edge cases
+- Large-scale batch operations
+- Cross-platform compatibility (macOS 15+ only)
+
+## Examples
+
+### Basic Usage
+
+```bash
+# Simple conversion
+$ plistyamlplist com.example.plist
+plist-yaml-plist version 1.0.0
+Processing plist file...
+Wrote to: com.example.plist.yaml
+
+# Reverse conversion
+$ plistyamlplist com.example.plist.yaml
+plist-yaml-plist version 1.0.0
+Processing yaml file...
+Written to com.example.plist
+```
+
+### YAML Folder Convention
+
+```bash
+# Input file in YAML subfolder
+$ plistyamlplist /Users/admin/recipes/YAML/Chrome.recipe.yaml
+YAML folder exists: /Users/admin/recipes/YAML/Chrome.recipe.yaml
+Path exists: /Users/admin/recipes
+Wrote to: /Users/admin/recipes/Chrome.recipe
+
+# The tool automatically maps YAML/subfolder → subfolder
+```
+
+### Batch Operations
+
+```bash
+# Convert all plist files in a directory to YAML
+$ plistyamlplist '/tmp/plists/*.plist'
+plist-yaml-plist version 1.0.0
+Processing 15 file(s)...
+Wrote to: /tmp/plists/file1.plist.yaml
+Wrote to: /tmp/plists/file2.plist.yaml
+...
+```
+
+### AutoPkg Recipe Tidying
+
+```bash
+# Tidy a single recipe
+$ plistyamlplist MyRecipe.recipe.yaml --tidy
+Wrote to: MyRecipe.recipe.yaml
+
+# Tidy all recipes in a folder
+$ plistyamlplist /path/to/YAML/ --tidy
+WARNING! Processing all subfolders...
+
+Processed 47 file(s)
+```
 
 ## Credits
 

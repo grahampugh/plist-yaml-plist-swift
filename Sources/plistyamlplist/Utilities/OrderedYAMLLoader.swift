@@ -47,6 +47,13 @@ struct OrderedYAMLLoader {
     private static func constructScalar(_ scalar: Yams.Node.Scalar) -> Any {
         let string = scalar.string
         
+        // If the scalar is explicitly quoted, keep it as a string
+        // This preserves "2.3" as string instead of converting to Double
+        let style = scalar.style
+        if style == .doubleQuoted || style == .singleQuoted {
+            return string
+        }
+        
         // Try boolean
         if string == "true" || string == "yes" {
             return true

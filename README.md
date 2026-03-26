@@ -17,6 +17,10 @@ A Swift implementation of the plist-yaml-plist conversion tool. Converts between
 
 ## Installation
 
+### Installing from Release Package
+
+Download the latest `.pkg` installer from the [Releases](https://github.com/grahampugh/plist-yaml-plist-swift/releases) page and run it. The binary will be installed to `/usr/local/bin/plistyamlplist`.
+
 ### Building from Source
 
 ```bash
@@ -24,12 +28,6 @@ git clone https://github.com/grahampugh/plist-yaml-plist-swift.git
 cd plist-yaml-plist-swift
 swift build -c release
 sudo cp .build/release/plistyamlplist /usr/local/bin/
-```
-
-### Installing via Homebrew (Coming Soon)
-
-```bash
-brew install plistyamlplist
 ```
 
 ## Usage
@@ -96,29 +94,28 @@ When converting AutoPkg recipes (files ending in `.recipe`, `.recipe.plist`, or 
 ## Comparison with Python Version
 
 This Swift implementation provides:
-- ✅ Full CLI compatibility with the Python version
-- ✅ All AutoPkg recipe optimizations
-- ✅ Native binary plist support (no `plutil` command needed)
-- ✅ Faster performance for batch operations
-- ✅ Same folder convention handling (YAML/_YAML, JSON/_JSON)
-- ✅ Glob pattern support for batch conversion
-- ⚠️ Requires macOS 15+ (Python version supports older macOS)
+- Full CLI compatibility with the Python version
+- All AutoPkg recipe optimizations
+- Native binary plist support (no `plutil` command needed)
+- Faster performance for batch operations
+- Same folder convention handling (YAML/_YAML, JSON/_JSON)
+- Glob pattern support for batch conversion
+- Requires macOS 15+ (Python version supports older macOS)
 
 ## Implementation Status
 
-### Complete ✅
+### Complete
 - Single file conversion (plist ↔ YAML, JSON → plist)
 - Batch conversion with glob patterns
 - Directory recursion with structure replication  
 - AutoPkg recipe detection and optimization
 - YAML/_YAML and JSON/_JSON folder conventions
-- --tidy flag for recipe reformatting
+- `--tidy` flag for recipe reformatting
 - Binary and XML plist support
 
 ### In Testing
 - Complex AutoPkg recipe formatting edge cases
 - Large-scale batch operations
-- Cross-platform compatibility (macOS 15+ only)
 
 ## Examples
 

@@ -1,4 +1,5 @@
 import Foundation
+import OrderedCollections
 
 /// Represents a property list value that can be converted to/from plist, YAML, and JSON
 enum PropertyListValue: Equatable {
@@ -9,7 +10,7 @@ enum PropertyListValue: Equatable {
     case date(Date)
     case data(Data)
     case array([PropertyListValue])
-    case dictionary([String: PropertyListValue])
+    case dictionary(OrderedDictionary<String, PropertyListValue>)
     
     /// Convert from a Foundation property list object
     init?(fromPlist object: Any) {
@@ -34,8 +35,15 @@ enum PropertyListValue: Equatable {
             guard values.count == array.count else { return nil }
             self = .array(values)
         case let dict as [String: Any]:
-            var result: [String: PropertyListValue] = [:]
+            var result = OrderedDictionary<String, PropertyListValue>()
             for (key, value) in dict {
+                guard let plValue = PropertyListValue(fromPlist: value) else { return nil }
+                result[key] = plValue
+            }
+            self = .dictionary(result)
+        case let orderedDict as OrderedDictionary<String, Any>:
+            var result = OrderedDictionary<String, PropertyListValue>()
+            for (key, value) in orderedDict {
                 guard let plValue = PropertyListValue(fromPlist: value) else { return nil }
                 result[key] = plValue
             }
@@ -63,7 +71,7 @@ enum PropertyListValue: Equatable {
         case .array(let values):
             return values.map { $0.toPlist() }
         case .dictionary(let dict):
-            return dict.mapValues { $0.toPlist() }
+            return Dictionary(uniqueKeysWithValues: dict.map { ($0.key, $0.value.toPlist()) })
         }
     }
 }

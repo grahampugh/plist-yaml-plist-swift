@@ -14,8 +14,7 @@ extension PropertyListValue {
     
     /// Create a PropertyListValue from an ordered dictionary
     static func fromOrderedDictionary(_ dict: OrderedDictionary<String, PropertyListValue>) -> PropertyListValue {
-        let regular = Dictionary(uniqueKeysWithValues: dict.map { ($0.key, $0.value) })
-        return .dictionary(regular)
+        return .dictionary(dict)
     }
 }
 

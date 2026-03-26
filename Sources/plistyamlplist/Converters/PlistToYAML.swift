@@ -99,8 +99,10 @@ struct PlistToYAMLConverter {
         case .array(let arr):
             return arr.map { convertToYamsObject($0) }
         case .dictionary(let dict):
-            // Convert to array of tuples to preserve order
-            return dict.mapValues { convertToYamsObject($0) }
+            // Convert OrderedDictionary to regular Dictionary for Yams
+            // Order is already lost at this point when using Yams
+            let regular = Dictionary(uniqueKeysWithValues: dict.map { ($0.key, convertToYamsObject($0.value)) })
+            return regular
         }
     }
     

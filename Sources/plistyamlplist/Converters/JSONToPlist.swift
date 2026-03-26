@@ -1,4 +1,5 @@
 import Foundation
+import OrderedCollections
 
 /// Converts JSON files to plist format
 struct JSONToPlistConverter {
@@ -81,7 +82,7 @@ struct JSONToPlistConverter {
             
         case .dictionary(let dict):
             // Remove null values and recursively clean remaining items
-            var cleaned: [String: PropertyListValue] = [:]
+            var cleaned = OrderedDictionary<String, PropertyListValue>()
             for (key, val) in dict {
                 cleaned[key] = cleanNullValues(val)
             }

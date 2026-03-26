@@ -105,8 +105,7 @@ struct AutoPkgRecipe {
         // [blank line will be added by formatter]
         // 6. Input
         if let input = input {
-            let inputDict = Dictionary(uniqueKeysWithValues: input.map { ($0, $1) })
-            ordered["Input"] = .dictionary(inputDict)
+            ordered["Input"] = .dictionary(input)
         }
         // [blank line will be added by formatter]
         // 7. Process
@@ -116,8 +115,7 @@ struct AutoPkgRecipe {
         // [blank line will be added by formatter before ParentRecipeTrustInfo]
         // 8. ParentRecipeTrustInfo
         if let trustInfo = parentRecipeTrustInfo {
-            let trustDict = Dictionary(uniqueKeysWithValues: trustInfo.map { ($0, $1) })
-            ordered["ParentRecipeTrustInfo"] = .dictionary(trustDict)
+            ordered["ParentRecipeTrustInfo"] = .dictionary(trustInfo)
         }
         
         // Add other fields at the end
@@ -125,8 +123,7 @@ struct AutoPkgRecipe {
             ordered[key] = value
         }
         
-        let dict = Dictionary(uniqueKeysWithValues: ordered.map { ($0, $1) })
-        return .dictionary(dict)
+        return .dictionary(ordered)
     }
 }
 
@@ -177,8 +174,7 @@ struct ProcessorStep {
         
         // 3. Add Arguments third (if present)
         if let arguments = arguments {
-            let argsDict = Dictionary(uniqueKeysWithValues: arguments.map { ($0, $1) })
-            ordered["Arguments"] = .dictionary(argsDict)
+            ordered["Arguments"] = .dictionary(arguments)
         }
         
         // 4. Add other fields after Arguments
@@ -186,7 +182,6 @@ struct ProcessorStep {
             ordered[key] = value
         }
         
-        let dict = Dictionary(uniqueKeysWithValues: ordered.map { ($0, $1) })
-        return .dictionary(dict)
+        return .dictionary(ordered)
     }
 }

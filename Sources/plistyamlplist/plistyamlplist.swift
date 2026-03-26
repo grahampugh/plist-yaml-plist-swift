@@ -157,16 +157,15 @@ struct PlistYAMLPlist: ParsableCommand {
     /// Tidy a single YAML file
     private func tidySingleFile(_ path: String) throws {
         let yamlString = try String(contentsOfFile: path, encoding: .utf8)
-        guard let yamlObject = try? Yams.load(yaml: yamlString) else {
-            throw ConversionError.invalidYAMLFormat("Could not parse YAML")
-        }
+        let yamlObject = try OrderedYAMLLoader.load(yaml: yamlString)
         
         guard let plValue = PropertyListValue(fromPlist: yamlObject) else {
             throw ConversionError.invalidYAMLFormat("Could not convert YAML to property list")
         }
         
-        // Check if it's a recipe
-        let isRecipe = FileDetector.isRecipeFilename(path)
+        // Check if it's a recipe (by filename or content)
+        let isRecipe = FileDetector.isRecipeFilename(path) || 
+                       (try? FileDetector.isRecipeContent(at: path)) == true
         let yaml: String
         
         if isRecipe, var recipe = AutoPkgRecipe(from: plValue) {

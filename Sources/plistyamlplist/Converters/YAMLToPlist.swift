@@ -18,10 +18,10 @@ struct YAMLToPlistConverter {
             throw ConversionError.fileNotFound(inputPath)
         }
         
-        // Parse YAML
+        // Parse YAML with order preservation
         let yamlObject: Any
         do {
-            yamlObject = try Yams.load(yaml: yamlString) ?? [:]
+            yamlObject = try OrderedYAMLLoader.load(yaml: yamlString)
         } catch {
             throw ConversionError.invalidYAMLFormat(error.localizedDescription)
         }

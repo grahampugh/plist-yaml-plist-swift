@@ -33,17 +33,23 @@ struct PlistToYAMLConverter {
             throw ConversionError.invalidPlistFormat("Could not convert plist data")
         }
         
-        // If it's an AutoPkg recipe, optimize it
-        let finalValue: PropertyListValue
-        if isRecipe, case .dictionary = plValue, var recipe = AutoPkgRecipe(from: plValue) {
-            AutoPkgOptimizer.optimize(&recipe)
-            finalValue = recipe.toPropertyListValue()
-        } else {
-            finalValue = plValue
-        }
+        // Generate YAML
+        let yamlString: String
         
-        // Convert to YAML
-        let yamlString = try convertToYAML(finalValue, isRecipe: isRecipe)
+        // If it's an AutoPkg recipe, use manual generation for exact ordering
+        if isRecipe, var recipe = AutoPkgRecipe(from: plValue) {
+            // Optimize the recipe (NAME first in Input, etc.)
+            AutoPkgOptimizer.optimize(&recipe)
+            
+            // Generate YAML manually to preserve ordering
+            yamlString = try RecipeYAMLGenerator.generate(from: recipe)
+            
+            // Verify the generated YAML is valid
+            try RecipeYAMLGenerator.verify(yamlString)
+        } else {
+            // For non-recipes, use standard Yams conversion
+            yamlString = try convertToYAML(plValue, isRecipe: false)
+        }
         
         // Write to file
         do {

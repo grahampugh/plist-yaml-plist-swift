@@ -164,23 +164,19 @@ struct PlistYAMLPlist: ParsableCommand {
             throw ConversionError.invalidYAMLFormat("Could not convert YAML to property list")
         }
         
-        // If it's a recipe, optimize it
-        let finalValue: PropertyListValue
-        if var recipe = AutoPkgRecipe(from: plValue) {
-            AutoPkgOptimizer.optimize(&recipe)
-            finalValue = recipe.toPropertyListValue()
-        } else {
-            finalValue = plValue
-        }
-        
-        // Convert back to YAML
-        let yamlObj = convertToYamsObject(finalValue)
-        var yaml = try Yams.dump(object: yamlObj, width: -1, sortKeys: false)
-        
-        // Apply AutoPkg formatting if it's a recipe
+        // Check if it's a recipe
         let isRecipe = FileDetector.isRecipeFilename(path)
-        if isRecipe {
-            yaml = formatAutoPkgRecipe(yaml)
+        let yaml: String
+        
+        if isRecipe, var recipe = AutoPkgRecipe(from: plValue) {
+            // Use RecipeYAMLGenerator for recipes to preserve ordering
+            AutoPkgOptimizer.optimize(&recipe)
+            yaml = try RecipeYAMLGenerator.generate(from: recipe)
+            try RecipeYAMLGenerator.verify(yaml)
+        } else {
+            // For non-recipes, use standard Yams
+            let yamlObj = convertToYamsObject(plValue)
+            yaml = try Yams.dump(object: yamlObj, width: -1, sortKeys: false)
         }
         
         // Write back

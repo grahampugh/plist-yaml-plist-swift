@@ -21,6 +21,8 @@ A completely vibe-coded Swift implementation of the plist-yaml-plist conversion 
 
 Download the latest `.pkg` installer from the [Releases](https://github.com/grahampugh/plist-yaml-plist-swift/releases) page and run it. The binary will be installed to `/usr/local/bin/plistyamlplist`.
 
+Note that the neither the package nor the binary are signed. So you'll have to remove the quarantine bit or use the bypass mechanism in Privacy Settings to install and run the binary.
+
 ### Building from Source
 
 ```bash

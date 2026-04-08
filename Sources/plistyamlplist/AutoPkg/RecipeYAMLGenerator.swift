@@ -160,19 +160,27 @@ struct RecipeYAMLGenerator {
             lines.append("\(indentStr)\(key): \(data.base64EncodedString())")
             
         case .array(let arr):
-            lines.append("\(indentStr)\(key):")
-            for item in arr {
-                try appendArrayItem(item, toLines: &lines, indent: indent + 2)
+            if arr.isEmpty {
+                lines.append("\(indentStr)\(key): []")
+            } else {
+                lines.append("\(indentStr)\(key):")
+                for item in arr {
+                    try appendArrayItem(item, toLines: &lines, indent: indent + 2)
+                }
             }
             
         case .dictionary(let dict):
-            lines.append("\(indentStr)\(key):")
-            for (subKey, subValue) in dict {
-                try appendValue(subValue, withKey: subKey, toLines: &lines, indent: indent + 2)
+            if dict.isEmpty {
+                lines.append("\(indentStr)\(key): {}")
+            } else {
+                lines.append("\(indentStr)\(key):")
+                for (subKey, subValue) in dict {
+                    try appendValue(subValue, withKey: subKey, toLines: &lines, indent: indent + 2)
+                }
             }
         }
     }
-    
+
     /// Append an array item to the YAML lines
     private static func appendArrayItem(_ value: PropertyListValue, toLines lines: inout [String], indent: Int) throws {
         let indentStr = String(repeating: " ", count: indent)
@@ -209,15 +217,23 @@ struct RecipeYAMLGenerator {
             lines.append("\(indentStr)- \(data.base64EncodedString())")
             
         case .array(let arr):
-            lines.append("\(indentStr)-")
-            for item in arr {
-                try appendArrayItem(item, toLines: &lines, indent: indent + 2)
+            if arr.isEmpty {
+                lines.append("\(indentStr)- []")
+            } else {
+                lines.append("\(indentStr)-")
+                for item in arr {
+                    try appendArrayItem(item, toLines: &lines, indent: indent + 2)
+                }
             }
-            
+
         case .dictionary(let dict):
-            lines.append("\(indentStr)-")
-            for (key, subValue) in dict {
-                try appendValue(subValue, withKey: key, toLines: &lines, indent: indent + 2)
+            if dict.isEmpty {
+                lines.append("\(indentStr)- {}")
+            } else {
+                lines.append("\(indentStr)-")
+                for (key, subValue) in dict {
+                    try appendValue(subValue, withKey: key, toLines: &lines, indent: indent + 2)
+                }
             }
         }
     }

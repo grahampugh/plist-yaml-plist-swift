@@ -21,7 +21,7 @@ struct PlistYAMLPlist: ParsableCommand {
             Or, if output is specified as another folder, the corresponding
             folder structure will be reproduced under the output folder.
             """,
-        version: "1.0.0"
+        version: "1.0.1"
     )
     
     @Argument(help: "Input file or directory")

@@ -49,7 +49,8 @@ plistyamlplist file.json [output.plist]
 
 If the output file is omitted:
 
-- `.plist` files → adds `.yaml` extension
+- `.plist` files → replaces `.plist` extension with `.yaml` (e.g. `foo.recipe.plist` → `foo.recipe.yaml`)
+- `.recipe` files (and other plist files without a `.plist` extension) → appends `.yaml` (e.g. `foo.recipe` → `foo.recipe.yaml`)
 - `.yaml` files → removes `.yaml` extension
 - `.json` files → removes `.json` extension
 
@@ -69,8 +70,14 @@ plistyamlplist /path/to/YAML/ --tidy
 # Convert all YAML files matching a pattern (note the quotes)
 plistyamlplist '/path/to/*.yaml'
 
-# Convert entire folder structure
-plistyamlplist /path/to/YAML/ /path/to/output/
+# Convert all plist-based AutoPkg recipes in a folder to YAML
+plistyamlplist '/path/to/recipes/*.recipe'
+
+# Convert entire folder (processes plist, YAML, and JSON files)
+plistyamlplist /path/to/recipes/
+
+# Convert entire folder with output to a different directory
+plistyamlplist /path/to/recipes/ /path/to/output/
 
 # Tidy all recipes in a folder recursively
 plistyamlplist /path/to/YAML/ --tidy
@@ -80,7 +87,7 @@ Note: When using glob patterns from the command line, wrap the pattern in quotes
 
 ### YAML/JSON Folder Convention
 
-If your path contains `YAML` or `_YAML` (or `JSON`/`_JSON`), the tool automatically determines output paths:
+If your path contains `YAML` or `_YAML` (or `JSON`/`_JSON`), the tool automatically maps output paths to the parent folder:
 
 - Input: `/project/YAML/subfolder/file.yaml`
 - Output: `/project/subfolder/file.plist` (if `/project/subfolder` exists)
@@ -130,13 +137,13 @@ This Swift implementation provides:
 ```bash
 # Simple conversion
 $ plistyamlplist com.example.plist
-plist-yaml-plist version 1.0.0
+plist-yaml-plist version 1.0.2
 Processing plist file...
 Wrote to: com.example.plist.yaml
 
 # Reverse conversion
 $ plistyamlplist com.example.plist.yaml
-plist-yaml-plist version 1.0.0
+plist-yaml-plist version 1.0.2
 Processing yaml file...
 Written to com.example.plist
 ```
@@ -158,10 +165,18 @@ Wrote to: /Users/admin/recipes/Chrome.recipe
 ```bash
 # Convert all plist files in a directory to YAML
 $ plistyamlplist '/tmp/plists/*.plist'
-plist-yaml-plist version 1.0.0
+plist-yaml-plist version 1.0.2
 Processing 15 file(s)...
-Wrote to: /tmp/plists/file1.plist.yaml
-Wrote to: /tmp/plists/file2.plist.yaml
+Wrote to: /tmp/plists/file1.yaml
+Wrote to: /tmp/plists/file2.yaml
+...
+
+# Convert all plist-based AutoPkg recipes in a directory to YAML
+$ plistyamlplist '/tmp/recipes/*.recipe'
+plist-yaml-plist version 1.0.2
+Processing 3 file(s)...
+Wrote to: /tmp/recipes/MyApp.recipe.yaml
+Wrote to: /tmp/recipes/OtherApp.recipe.yaml
 ...
 ```
 

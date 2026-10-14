@@ -10,18 +10,20 @@ struct PlistYAMLPlist: ParsableCommand {
         abstract: "Convert between plist, YAML, and JSON formats",
         discussion: """
             If input is a PLIST file and output is omitted,
-            input is converted to <input>.yaml in the same folder.
-            
+            the .plist extension is replaced with .yaml (e.g. foo.recipe.plist → foo.recipe.yaml).
+            Files with no .plist extension that are detected as plist (e.g. .recipe files)
+            have .yaml appended (e.g. foo.recipe → foo.recipe.yaml).
+
             If input ends in .yaml or .yml and output is omitted,
-            input.yaml is converted to PLIST format with name <input>
-            
-            If input is a folder with 'YAML' or 'JSON' in the path,
-            all yaml files in the subfolders will be converted to plists in
-            the corresponding subfolder structure above the YAML or JSON folder.
-            Or, if output is specified as another folder, the corresponding
-            folder structure will be reproduced under the output folder.
+            input.yaml is converted to PLIST format with name <input>.
+
+            If input is a folder, all plist, YAML, and JSON files in the folder
+            tree are converted. If output is specified as another folder, the
+            folder structure is reproduced under the output folder.
+            If the input path contains 'YAML' or 'JSON', YAML/JSON files are
+            mapped to the corresponding subfolder structure above that folder.
             """,
-        version: "1.0.1"
+        version: "1.0.2"
     )
     
     @Argument(help: "Input file or directory")
@@ -116,17 +118,8 @@ struct PlistYAMLPlist: ParsableCommand {
     /// Handle directory conversion (batch processing)
     private func handleDirectory(_ inputPath: String) throws {
         let outputDir = output.map { PathHandler.expandTilde($0) }
-        
-        // Check if directory is a YAML or JSON folder
-        let isYAMLFolder = inputPath.contains("/YAML/") || inputPath.contains("/_YAML/")
-        let isJSONFolder = inputPath.contains("/JSON/") || inputPath.contains("/_JSON/")
-        
-        if isYAMLFolder || isJSONFolder {
-            print("Processing folder...")
-            try BatchProcessor.processDirectory(inputDir: inputPath, outputDir: outputDir, tidy: tidy)
-        } else {
-            throw ConversionError.unsupportedFileType("Directory must contain YAML or JSON in path for batch processing")
-        }
+        print("Processing folder...")
+        try BatchProcessor.processDirectory(inputDir: inputPath, outputDir: outputDir, tidy: tidy)
     }
     
     /// Handle --tidy flag

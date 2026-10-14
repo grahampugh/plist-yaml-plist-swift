@@ -105,8 +105,13 @@ struct PathHandler {
             return url.deletingPathExtension().path
             
         case .plist:
-            // For plist files, add .yaml extension
-            return absolutePath + ".yaml"
+            // Strip .plist extension if present, otherwise append .yaml to the full path
+            // (e.g. foo.recipe.plist → foo.recipe.yaml; foo.recipe → foo.recipe.yaml)
+            if url.pathExtension.lowercased() == "plist" {
+                return url.deletingPathExtension().path + ".yaml"
+            } else {
+                return absolutePath + ".yaml"
+            }
             
         case .unknown:
             // Try to detect if it's a plist by content

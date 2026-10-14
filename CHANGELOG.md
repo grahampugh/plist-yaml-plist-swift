@@ -2,6 +2,16 @@
 
 All notable changes to plist-yaml-plist (Swift) will be documented in this file.
 
+## [1.0.2] - 2026-10-14
+
+### Added
+- Batch processing now works on any directory, not just paths containing `YAML` or `JSON`
+- Plist files without a `.plist` extension (e.g. AutoPkg `.recipe` files) are now detected by content and included in batch conversions
+- Glob patterns such as `'*.recipe'` can be used to convert AutoPkg recipe files
+
+### Changed
+- Output naming for plist → YAML: `.plist` extension is replaced with `.yaml` (e.g. `foo.recipe.plist` → `foo.recipe.yaml`); files with no `.plist` extension have `.yaml` appended (e.g. `foo.recipe` → `foo.recipe.yaml`)
+
 ## [1.0.1] - 2026-04-08
 
 ### Fixed

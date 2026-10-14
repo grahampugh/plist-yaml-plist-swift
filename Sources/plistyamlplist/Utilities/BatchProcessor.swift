@@ -109,35 +109,53 @@ struct BatchProcessor {
                 continue
             }
             
-            let fileType = FileDetector.detectFileType(fullPath)
-            
-            // For YAML/JSON folders, process conversion files
-            if fileType == .yaml || fileType == .json {
-                let outputPath: String
-                if let outputDir = outputDir {
-                    // Replicate directory structure in output
-                    let relativePath = file
-                    let baseName = URL(fileURLWithPath: relativePath).deletingPathExtension().lastPathComponent
-                    let subDir = URL(fileURLWithPath: relativePath).deletingLastPathComponent().path
-                    let outputSubDir = (outputDir as NSString).appendingPathComponent(subDir)
-                    
-                    // Create output directory if needed
-                    try? fileManager.createDirectory(atPath: outputSubDir, withIntermediateDirectories: true)
-                    
-                    outputPath = (outputSubDir as NSString).appendingPathComponent(baseName)
-                } else {
-                    guard let determined = PathHandler.determineOutputPath(for: fullPath, fileType: fileType) else {
-                        continue
+            var fileType = FileDetector.detectFileType(fullPath)
+
+            // Content-sniff unknown extensions (e.g. .recipe files)
+            if fileType == .unknown && FileDetector.isPlistFile(fullPath) {
+                fileType = .plist
+            }
+
+            guard fileType == .yaml || fileType == .json || fileType == .plist else {
+                continue
+            }
+
+            let outputPath: String
+            if let outputDir = outputDir {
+                // Replicate directory structure in output
+                let relativePath = file
+                let url = URL(fileURLWithPath: relativePath)
+                let baseName: String
+                if fileType == .plist {
+                    // Strip the .plist extension (if present) and add .yaml;
+                    // for extensionless-plist files (e.g. .recipe), append .yaml to the full filename
+                    let ext = url.pathExtension.lowercased()
+                    if ext == "plist" {
+                        baseName = url.deletingPathExtension().lastPathComponent + ".yaml"
+                    } else {
+                        baseName = url.lastPathComponent + ".yaml"
                     }
-                    outputPath = determined
+                } else {
+                    baseName = url.deletingPathExtension().lastPathComponent
                 }
-                
-                do {
-                    try convertSingleFile(input: fullPath, output: outputPath, fileType: fileType, tidy: tidy)
-                    processedCount += 1
-                } catch {
-                    print("ERROR: Failed to convert \(fullPath): \(error.localizedDescription)")
+                let subDir = url.deletingLastPathComponent().path
+                let outputSubDir = (outputDir as NSString).appendingPathComponent(subDir)
+
+                try? fileManager.createDirectory(atPath: outputSubDir, withIntermediateDirectories: true)
+
+                outputPath = (outputSubDir as NSString).appendingPathComponent(baseName)
+            } else {
+                guard let determined = PathHandler.determineOutputPath(for: fullPath, fileType: fileType) else {
+                    continue
                 }
+                outputPath = determined
+            }
+
+            do {
+                try convertSingleFile(input: fullPath, output: outputPath, fileType: fileType, tidy: tidy)
+                processedCount += 1
+            } catch {
+                print("ERROR: Failed to convert \(fullPath): \(error.localizedDescription)")
             }
         }
         
